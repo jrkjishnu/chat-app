@@ -1,6 +1,7 @@
 const path = require('path')
 const express = require('express')
 const socketio = require('socket.io')
+const Filter = require('bad-words')
 
 const http = require('http')
 const app = express()
@@ -26,13 +27,21 @@ io.on('connection',(socket)=>{
 
     socket.emit('message','Welcome!!')//only for single user
     socket.broadcast.emit('message','A new user joined')
-    socket.on('message',(newmessage)=>
+    socket.on('sendMessage',(newmessage,callback)=>
     {
+        const filter = new Filter()
+
+        if(filter.isProfane(newmessage))
+        {
+            return callback('Profanity is not allowed')
+        }
         io.emit('message',newmessage)//evry single users
+        callback()
     })
 
-    socket.on('sendLocation',(position)=>{
+    socket.on('sendLocation',(position,callback)=>{
         io.emit('message',`https://google.com/maps?q=${position.latitude},${position.longitude}`)
+        callback('Delivered!!')
     })
 
     socket.on('disconnect',()=>
