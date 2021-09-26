@@ -3,6 +3,8 @@ const express = require('express')
 const socketio = require('socket.io')
 const Filter = require('bad-words')
 
+const {generateMessage,generateLocationMessage} = require('./utils/messages')
+
 const http = require('http')
 const app = express()
 const server = http.createServer(app)
@@ -25,8 +27,16 @@ io.on('connection',(socket)=>{
     //     io.emit('countUpdated',count)
     // })
 
-    socket.emit('message','Welcome!!')//only for single user
-    socket.broadcast.emit('message','A new user joined')
+  
+    socket.on('join',({ username, room}) =>
+    {
+        socket.join(room)
+
+        socket.emit('message',generateMessage('Welcome!!'))//only for single user
+        socket.broadcast.to(room).emit('message',generateMessage(`${username} has joined!!`))
+        
+    })
+    
     socket.on('sendMessage',(newmessage,callback)=>
     {
         const filter = new Filter()
@@ -35,18 +45,18 @@ io.on('connection',(socket)=>{
         {
             return callback('Profanity is not allowed')
         }
-        io.emit('message',newmessage)//evry single users
+        io.to('sdv').emit('message',generateMessage(newmessage))//evry single users
         callback()
     })
 
     socket.on('sendLocation',(position,callback)=>{
-        io.emit('message',`https://google.com/maps?q=${position.latitude},${position.longitude}`)
+        io.emit('locationMessage',generateLocationMessage(`https://google.com/maps?q=${position.latitude},${position.longitude}`))
         callback('Delivered!!')
     })
 
     socket.on('disconnect',()=>
     {
-        io.emit('message','User Disconnected')
+        io.emit('message',generateMessage('User Disconnected'))
     })
 })
 
