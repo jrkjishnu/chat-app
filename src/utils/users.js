@@ -56,21 +56,10 @@ const getUsersInRoom = (room)=>
     return user;
 }
 
-addUser({
-    id:10,
-    username:'jk',
-    room:'chunda'
-})
-addUser({
-    id:22,
-    username:'jkkkk',
-    room:'pul'
-})
-addUser({
-    id:50,
-    username:'jrrrk',
-    room:'chunda'
-})
 
-console.log(getUsersInRoom('chuna'));
-//console.log(getUser(50));
+module.exports = {
+    addUser,
+    removeUser,
+    getUser,
+    getUsersInRoom
+}
